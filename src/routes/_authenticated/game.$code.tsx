@@ -101,7 +101,8 @@ function GamePage() {
         }
       }
       // Initialize my position
-      const me = ps?.find((p) => p.user_id === (await supabase.auth.getUser()).data.user?.id);
+      const { data: ud } = await supabase.auth.getUser();
+      const me = ps?.find((p) => p.user_id === ud.user?.id);
       if (me) {
         myPosRef.current = { x: me.pos_x, z: me.pos_z, rotY: me.rot_y };
       }
