@@ -203,6 +203,14 @@ export function MeetingOverlay({
             </div>
           </>
         )}
+
+        <MeetingChat
+          channel={channel}
+          myUserId={myUserId}
+          myName={me?.display_name ?? "You"}
+          myColor={me?.color ?? "#fff"}
+          canSend={isAlive}
+        />
       </div>
     </div>
   );
