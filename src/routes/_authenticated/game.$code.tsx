@@ -359,6 +359,28 @@ function GamePage() {
     setTaskOpen(nearbyTask);
   }
 
+  // Vent teleport — murderer only, when standing on a vent grate.
+  function tryVent() {
+    if (!me || me.role !== "murderer" || !me.alive) return;
+    const px = myPosRef.current.x;
+    const pz = myPosRef.current.z;
+    const onIdx = VENT_POSITIONS.findIndex(
+      (v) => Math.hypot(v.x - px, v.z - pz) < 1.2,
+    );
+    if (onIdx < 0) {
+      toast.info("Stand on a vent grate to escape");
+      return;
+    }
+    const next = VENT_POSITIONS[(onIdx + 1) % VENT_POSITIONS.length];
+    myPosRef.current.x = next.x;
+    myPosRef.current.z = next.z;
+    // Nudge the mesh directly if Scene3D exposes it; otherwise transform sync on next tick.
+    window.dispatchEvent(
+      new CustomEvent("para:teleport", { detail: { x: next.x, z: next.z } }),
+    );
+    sfx.vent();
+  }
+
   async function onTaskComplete() {
     if (!room || !me || !taskOpen) return;
     setTaskOpen(null);
