@@ -392,11 +392,13 @@ function GamePage() {
       currentDone: me.tasks_done,
       currentTotal: me.tasks_total,
     });
+    sfx.taskDone();
     toast.success("Task complete");
   }
 
   async function onVote(target: string | null) {
     if (!room || !userId || !meeting) return;
+    sfx.click();
     await castVote({
       roomId: room.id,
       meetingId: meeting.id,
