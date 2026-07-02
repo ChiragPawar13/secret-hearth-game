@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Skull, LogOut } from "lucide-react";
+import { Skull, LogOut, Bot } from "lucide-react";
 import { toast } from "sonner";
 import { createRoom, joinRoomByCode } from "@/lib/game/rooms";
 import { PLAYER_COLORS } from "@/lib/colors";
@@ -85,6 +85,17 @@ function MenuPage() {
       navigate({ to: "/lobby/$code", params: { code: room.code } });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to join room");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onPlayBots() {
+    if (!user) return;
+    setBusy(true);
+    try {
+      await persistProfile();
+      navigate({ to: "/game/bot" });
     } finally {
       setBusy(false);
     }
