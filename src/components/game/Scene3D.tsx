@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
-import { Mansion, MANSION_BOUNDS, TASK_POSITIONS } from "./Mansion";
+import { Mansion, MANSION_BOUNDS, TASK_POSITIONS, VENT_POSITIONS } from "./Mansion";
+import { resolveMove } from "@/lib/game/collision";
 import type { Tables } from "@/integrations/supabase/types";
 
 export type RemoteTransform = {
@@ -75,15 +76,19 @@ function LocalPlayer({
           .addScaledVector(right, inp.x)
           .addScaledVector(forward, inp.y);
         dir.normalize().multiplyScalar(speed * dt);
-        meshRef.current.position.add(dir);
-        // Clamp to bounds
-        meshRef.current.position.x = THREE.MathUtils.clamp(
+        const resolved = resolveMove(
           meshRef.current.position.x,
+          meshRef.current.position.z,
+          dir.x,
+          dir.z,
+        );
+        meshRef.current.position.x = THREE.MathUtils.clamp(
+          resolved.x,
           -MANSION_BOUNDS + 1,
           MANSION_BOUNDS - 1,
         );
         meshRef.current.position.z = THREE.MathUtils.clamp(
-          meshRef.current.position.z,
+          resolved.z,
           -MANSION_BOUNDS + 1,
           MANSION_BOUNDS - 1,
         );
