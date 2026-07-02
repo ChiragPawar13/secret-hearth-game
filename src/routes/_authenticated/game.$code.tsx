@@ -245,9 +245,11 @@ function GamePage() {
       const k = e.key.toLowerCase();
       keys.add(k);
       update();
+      sfx.unlock();
       if (k === "e") tryKill();
       if (k === "r") tryReport();
       if (k === "f") tryStartTask();
+      if (k === "q") tryVent();
     }
     function up(e: KeyboardEvent) {
       keys.delete(e.key.toLowerCase());
