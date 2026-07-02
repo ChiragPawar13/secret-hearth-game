@@ -452,6 +452,18 @@ function GamePage() {
     }
   }, [isHost, room, aliveDetectives, totalDetectives, players]);
 
+  // Win/lose sting when game ends.
+  const endedStingRef = useRef(false);
+  useEffect(() => {
+    if (!room || room.phase !== "ended" || !room.winner || !me || endedStingRef.current) return;
+    endedStingRef.current = true;
+    const won =
+      (room.winner === "murderer" && me.role === "murderer") ||
+      (room.winner === "detectives" && me.role === "detective");
+    if (won) sfx.win();
+    else sfx.lose();
+  }, [room, me]);
+
   // Detect touch
   const isTouch = useMemo(
     () => typeof window !== "undefined" && "ontouchstart" in window,
