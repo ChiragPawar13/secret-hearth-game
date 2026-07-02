@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import type { Tables } from "@/integrations/supabase/types";
 
 import { Scene3D, mapToPlayerView, type RemoteTransform } from "@/components/game/Scene3D";
-import { TASK_POSITIONS } from "@/components/game/Mansion";
+import { TASK_POSITIONS, VENT_POSITIONS } from "@/components/game/Mansion";
+import { sfx } from "@/lib/game/sfx";
 import { HUD } from "@/components/game/HUD";
 import { MobileJoystick } from "@/components/game/MobileJoystick";
 import { TaskMinigame } from "@/components/game/TaskMinigame";
