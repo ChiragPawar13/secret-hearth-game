@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Skull, X } from "lucide-react";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { Tables } from "@/integrations/supabase/types";
+import { MeetingChat } from "./MeetingChat";
 
 type Player = Tables<"room_players">;
 type Meeting = Tables<"meetings">;
@@ -13,6 +15,7 @@ type Props = {
   votes: Vote[];
   myUserId: string;
   isHost: boolean;
+  channel: RealtimeChannel | null;
   onVote: (targetUserId: string | null) => void;
   onResolve: () => void;
   onContinue: () => void;
@@ -28,6 +31,7 @@ export function MeetingOverlay({
   votes,
   myUserId,
   isHost,
+  channel,
   onVote,
   onResolve,
   onContinue,
@@ -199,6 +203,14 @@ export function MeetingOverlay({
             </div>
           </>
         )}
+
+        <MeetingChat
+          channel={channel}
+          myUserId={myUserId}
+          myName={me?.display_name ?? "You"}
+          myColor={me?.color ?? "#fff"}
+          canSend={isAlive}
+        />
       </div>
     </div>
   );

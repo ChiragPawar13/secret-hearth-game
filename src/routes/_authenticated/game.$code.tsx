@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import type { Tables } from "@/integrations/supabase/types";
 
 import { Scene3D, mapToPlayerView, type RemoteTransform } from "@/components/game/Scene3D";
-import { TASK_POSITIONS } from "@/components/game/Mansion";
+import { TASK_POSITIONS, VENT_POSITIONS } from "@/components/game/Mansion";
+import { sfx } from "@/lib/game/sfx";
 import { HUD } from "@/components/game/HUD";
 import { MobileJoystick } from "@/components/game/MobileJoystick";
 import { TaskMinigame } from "@/components/game/TaskMinigame";
@@ -67,7 +68,20 @@ function GamePage() {
   // Auth + initial load
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+    // Unlock WebAudio on first pointer interaction.
+    const unlock = () => sfx.unlock();
+    window.addEventListener("pointerdown", unlock, { once: true });
+    return () => window.removeEventListener("pointerdown", unlock);
   }, []);
+
+  // Play meeting-start sfx when a new meeting arrives.
+  const lastMeetingIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (meeting && meeting.id !== lastMeetingIdRef.current) {
+      lastMeetingIdRef.current = meeting.id;
+      sfx.meetingStart();
+    }
+  }, [meeting]);
 
   useEffect(() => {
     let cancelled = false;
@@ -244,9 +258,11 @@ function GamePage() {
       const k = e.key.toLowerCase();
       keys.add(k);
       update();
+      sfx.unlock();
       if (k === "e") tryKill();
       if (k === "r") tryReport();
       if (k === "f") tryStartTask();
+      if (k === "q") tryVent();
     }
     function up(e: KeyboardEvent) {
       keys.delete(e.key.toLowerCase());
@@ -335,6 +351,7 @@ function GamePage() {
     if (!room || !userId || !killTarget) return;
     try {
       await killPlayer({ roomId: room.id, killerId: userId, targetPlayerId: killTarget.id });
+      sfx.kill();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Kill failed");
     }
@@ -347,6 +364,7 @@ function GamePage() {
         calledBy: userId,
         bodyOfUserId: reportBody.user_id,
       });
+      sfx.report();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Report failed");
     }
@@ -354,6 +372,28 @@ function GamePage() {
   function tryStartTask() {
     if (!nearbyTask) return;
     setTaskOpen(nearbyTask);
+  }
+
+  // Vent teleport — murderer only, when standing on a vent grate.
+  function tryVent() {
+    if (!me || me.role !== "murderer" || !me.is_alive) return;
+    const px = myPosRef.current.x;
+    const pz = myPosRef.current.z;
+    const onIdx = VENT_POSITIONS.findIndex(
+      (v) => Math.hypot(v.x - px, v.z - pz) < 1.2,
+    );
+    if (onIdx < 0) {
+      toast.info("Stand on a vent grate to escape");
+      return;
+    }
+    const next = VENT_POSITIONS[(onIdx + 1) % VENT_POSITIONS.length];
+    myPosRef.current.x = next.x;
+    myPosRef.current.z = next.z;
+    // Nudge the mesh directly if Scene3D exposes it; otherwise transform sync on next tick.
+    window.dispatchEvent(
+      new CustomEvent("para:teleport", { detail: { x: next.x, z: next.z } }),
+    );
+    sfx.vent();
   }
 
   async function onTaskComplete() {
@@ -365,11 +405,13 @@ function GamePage() {
       currentDone: me.tasks_done,
       currentTotal: me.tasks_total,
     });
+    sfx.taskDone();
     toast.success("Task complete");
   }
 
   async function onVote(target: string | null) {
     if (!room || !userId || !meeting) return;
+    sfx.click();
     await castVote({
       roomId: room.id,
       meetingId: meeting.id,
@@ -409,6 +451,18 @@ function GamePage() {
       endGame({ roomId: room.id, winner: "detectives" }).catch(() => {});
     }
   }, [isHost, room, aliveDetectives, totalDetectives, players]);
+
+  // Win/lose sting when game ends.
+  const endedStingRef = useRef(false);
+  useEffect(() => {
+    if (!room || room.phase !== "ended" || !room.winner || !me || endedStingRef.current) return;
+    endedStingRef.current = true;
+    const won =
+      (room.winner === "murderer" && me.role === "murderer") ||
+      (room.winner === "detectives" && me.role === "detective");
+    if (won) sfx.win();
+    else sfx.lose();
+  }, [room, me]);
 
   // Detect touch
   const isTouch = useMemo(
@@ -494,6 +548,7 @@ function GamePage() {
           votes={votes}
           myUserId={userId}
           isHost={isHost}
+          channel={channelRef.current}
           onVote={onVote}
           onResolve={onResolve}
           onContinue={onContinue}

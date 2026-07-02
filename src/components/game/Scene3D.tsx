@@ -2,7 +2,8 @@ import { useEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Text } from "@react-three/drei";
 import * as THREE from "three";
-import { Mansion, MANSION_BOUNDS, TASK_POSITIONS } from "./Mansion";
+import { Mansion, MANSION_BOUNDS, TASK_POSITIONS, VENT_POSITIONS } from "./Mansion";
+import { resolveMove } from "@/lib/game/collision";
 import type { Tables } from "@/integrations/supabase/types";
 
 export type RemoteTransform = {
@@ -53,6 +54,20 @@ function LocalPlayer({
   const yaw = useRef(0);
   const camOffset = useMemo(() => new THREE.Vector3(0, 6, 8), []);
 
+  // Listen for external teleport (vent) events dispatched by game route.
+  useEffect(() => {
+    function onTeleport(e: Event) {
+      const detail = (e as CustomEvent<{ x: number; z: number }>).detail;
+      if (!detail || !meshRef.current) return;
+      meshRef.current.position.x = detail.x;
+      meshRef.current.position.z = detail.z;
+      myPosRef.current.x = detail.x;
+      myPosRef.current.z = detail.z;
+    }
+    window.addEventListener("para:teleport", onTeleport as EventListener);
+    return () => window.removeEventListener("para:teleport", onTeleport as EventListener);
+  }, [myPosRef]);
+
   useFrame((_state, delta) => {
     if (!meshRef.current) return;
     const dt = Math.min(delta, 0.05);
@@ -75,15 +90,19 @@ function LocalPlayer({
           .addScaledVector(right, inp.x)
           .addScaledVector(forward, inp.y);
         dir.normalize().multiplyScalar(speed * dt);
-        meshRef.current.position.add(dir);
-        // Clamp to bounds
-        meshRef.current.position.x = THREE.MathUtils.clamp(
+        const resolved = resolveMove(
           meshRef.current.position.x,
+          meshRef.current.position.z,
+          dir.x,
+          dir.z,
+        );
+        meshRef.current.position.x = THREE.MathUtils.clamp(
+          resolved.x,
           -MANSION_BOUNDS + 1,
           MANSION_BOUNDS - 1,
         );
         meshRef.current.position.z = THREE.MathUtils.clamp(
-          meshRef.current.position.z,
+          resolved.z,
           -MANSION_BOUNDS + 1,
           MANSION_BOUNDS - 1,
         );
