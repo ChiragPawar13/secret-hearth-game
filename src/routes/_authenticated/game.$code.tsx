@@ -519,6 +519,7 @@ function GamePage() {
           votes={votes}
           myUserId={userId}
           isHost={isHost}
+          channel={channelRef.current}
           onVote={onVote}
           onResolve={onResolve}
           onContinue={onContinue}
