@@ -361,7 +361,7 @@ function GamePage() {
 
   // Vent teleport — murderer only, when standing on a vent grate.
   function tryVent() {
-    if (!me || me.role !== "murderer" || !me.alive) return;
+    if (!me || me.role !== "murderer" || !me.is_alive) return;
     const px = myPosRef.current.x;
     const pz = myPosRef.current.z;
     const onIdx = VENT_POSITIONS.findIndex(
