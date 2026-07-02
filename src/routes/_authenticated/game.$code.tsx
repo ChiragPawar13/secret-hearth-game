@@ -338,6 +338,7 @@ function GamePage() {
     if (!room || !userId || !killTarget) return;
     try {
       await killPlayer({ roomId: room.id, killerId: userId, targetPlayerId: killTarget.id });
+      sfx.kill();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Kill failed");
     }
@@ -350,6 +351,7 @@ function GamePage() {
         calledBy: userId,
         bodyOfUserId: reportBody.user_id,
       });
+      sfx.report();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Report failed");
     }
