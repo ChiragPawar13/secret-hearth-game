@@ -68,7 +68,20 @@ function GamePage() {
   // Auth + initial load
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
+    // Unlock WebAudio on first pointer interaction.
+    const unlock = () => sfx.unlock();
+    window.addEventListener("pointerdown", unlock, { once: true });
+    return () => window.removeEventListener("pointerdown", unlock);
   }, []);
+
+  // Play meeting-start sfx when a new meeting arrives.
+  const lastMeetingIdRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (meeting && meeting.id !== lastMeetingIdRef.current) {
+      lastMeetingIdRef.current = meeting.id;
+      sfx.meetingStart();
+    }
+  }, [meeting]);
 
   useEffect(() => {
     let cancelled = false;
