@@ -9,6 +9,14 @@ export const TASK_POSITIONS: { id: string; label: string; x: number; z: number; 
   { id: "cellar", label: "Cellar", x: 12, z: 12, color: "#5e2b2b" },
 ];
 
+// Secret vents — only the murderer can use them, teleporting between paired locations.
+export const VENT_POSITIONS: { id: string; x: number; z: number }[] = [
+  { id: "v-lib", x: -15, z: -15 },
+  { id: "v-kit", x: 15, z: -15 },
+  { id: "v-ball", x: -15, z: 15 },
+  { id: "v-cel", x: 15, z: 15 },
+];
+
 const WALLS: { x: number; z: number; w: number; d: number; h: number }[] = [
   // Perimeter
   { x: 0, z: -MANSION_BOUNDS, w: MANSION_BOUNDS * 2, d: 0.6, h: 3 },
@@ -81,6 +89,20 @@ export function Mansion() {
           <mesh position={[0, 0.6, 0]}>
             <cylinderGeometry args={[0.35, 0.35, 1.2, 16]} />
             <meshStandardMaterial color={t.color} emissive={t.color} emissiveIntensity={0.4} />
+          </mesh>
+        </group>
+      ))}
+
+      {/* Vent grates */}
+      {VENT_POSITIONS.map((v) => (
+        <group key={v.id} position={[v.x, 0, v.z]}>
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.03, 0]}>
+            <ringGeometry args={[0.5, 0.75, 24]} />
+            <meshBasicMaterial color="#1a0a0a" />
+          </mesh>
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.04, 0]}>
+            <circleGeometry args={[0.5, 24]} />
+            <meshStandardMaterial color="#0d0508" emissive="#3a0000" emissiveIntensity={0.4} />
           </mesh>
         </group>
       ))}
