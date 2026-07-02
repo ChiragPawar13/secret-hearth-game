@@ -214,6 +214,22 @@ function MenuPage() {
               </Button>
             </div>
           </div>
+
+          <div className="panel p-6 border-blood/40">
+            <h2 className="font-display text-2xl mb-1 flex items-center gap-2">
+              <Bot className="size-5 text-blood" /> Play with bots
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Solo practice against 5 AI opponents. No lobby, no waiting.
+            </p>
+            <Button
+              onClick={onPlayBots}
+              disabled={busy}
+              className="w-full h-11 bg-blood hover:bg-blood/90 text-primary-foreground glow-blood"
+            >
+              Start solo match
+            </Button>
+          </div>
         </section>
       </div>
     </div>
