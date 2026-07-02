@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Skull, LogOut } from "lucide-react";
+import { Skull, LogOut, Bot } from "lucide-react";
 import { toast } from "sonner";
 import { createRoom, joinRoomByCode } from "@/lib/game/rooms";
 import { PLAYER_COLORS } from "@/lib/colors";
@@ -85,6 +85,17 @@ function MenuPage() {
       navigate({ to: "/lobby/$code", params: { code: room.code } });
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Failed to join room");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function onPlayBots() {
+    if (!user) return;
+    setBusy(true);
+    try {
+      await persistProfile();
+      navigate({ to: "/game/bot" });
     } finally {
       setBusy(false);
     }
@@ -202,6 +213,22 @@ function MenuPage() {
                 Join
               </Button>
             </div>
+          </div>
+
+          <div className="panel p-6 border-blood/40">
+            <h2 className="font-display text-2xl mb-1 flex items-center gap-2">
+              <Bot className="size-5 text-blood" /> Play with bots
+            </h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Solo practice against 5 AI opponents. No lobby, no waiting.
+            </p>
+            <Button
+              onClick={onPlayBots}
+              disabled={busy}
+              className="w-full h-11 bg-blood hover:bg-blood/90 text-primary-foreground glow-blood"
+            >
+              Start solo match
+            </Button>
           </div>
         </section>
       </div>

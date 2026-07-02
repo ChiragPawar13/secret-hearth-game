@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedMenuRouteImport } from './routes/_authenticated/menu'
 import { Route as AuthenticatedLobbyCodeRouteImport } from './routes/_authenticated/lobby.$code'
+import { Route as AuthenticatedGameBotRouteImport } from './routes/_authenticated/game.bot'
 import { Route as AuthenticatedGameCodeRouteImport } from './routes/_authenticated/game.$code'
 
 const AuthRoute = AuthRouteImport.update({
@@ -40,6 +41,11 @@ const AuthenticatedLobbyCodeRoute = AuthenticatedLobbyCodeRouteImport.update({
   path: '/lobby/$code',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedGameBotRoute = AuthenticatedGameBotRouteImport.update({
+  id: '/game/bot',
+  path: '/game/bot',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedGameCodeRoute = AuthenticatedGameCodeRouteImport.update({
   id: '/game/$code',
   path: '/game/$code',
@@ -51,6 +57,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/menu': typeof AuthenticatedMenuRoute
   '/game/$code': typeof AuthenticatedGameCodeRoute
+  '/game/bot': typeof AuthenticatedGameBotRoute
   '/lobby/$code': typeof AuthenticatedLobbyCodeRoute
 }
 export interface FileRoutesByTo {
@@ -58,6 +65,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/menu': typeof AuthenticatedMenuRoute
   '/game/$code': typeof AuthenticatedGameCodeRoute
+  '/game/bot': typeof AuthenticatedGameBotRoute
   '/lobby/$code': typeof AuthenticatedLobbyCodeRoute
 }
 export interface FileRoutesById {
@@ -67,13 +75,20 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/menu': typeof AuthenticatedMenuRoute
   '/_authenticated/game/$code': typeof AuthenticatedGameCodeRoute
+  '/_authenticated/game/bot': typeof AuthenticatedGameBotRoute
   '/_authenticated/lobby/$code': typeof AuthenticatedLobbyCodeRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/menu' | '/game/$code' | '/lobby/$code'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/menu'
+    | '/game/$code'
+    | '/game/bot'
+    | '/lobby/$code'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/menu' | '/game/$code' | '/lobby/$code'
+  to: '/' | '/auth' | '/menu' | '/game/$code' | '/game/bot' | '/lobby/$code'
   id:
     | '__root__'
     | '/'
@@ -81,6 +96,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/menu'
     | '/_authenticated/game/$code'
+    | '/_authenticated/game/bot'
     | '/_authenticated/lobby/$code'
   fileRoutesById: FileRoutesById
 }
@@ -127,6 +143,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLobbyCodeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/game/bot': {
+      id: '/_authenticated/game/bot'
+      path: '/game/bot'
+      fullPath: '/game/bot'
+      preLoaderRoute: typeof AuthenticatedGameBotRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/game/$code': {
       id: '/_authenticated/game/$code'
       path: '/game/$code'
@@ -140,12 +163,14 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedMenuRoute: typeof AuthenticatedMenuRoute
   AuthenticatedGameCodeRoute: typeof AuthenticatedGameCodeRoute
+  AuthenticatedGameBotRoute: typeof AuthenticatedGameBotRoute
   AuthenticatedLobbyCodeRoute: typeof AuthenticatedLobbyCodeRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMenuRoute: AuthenticatedMenuRoute,
   AuthenticatedGameCodeRoute: AuthenticatedGameCodeRoute,
+  AuthenticatedGameBotRoute: AuthenticatedGameBotRoute,
   AuthenticatedLobbyCodeRoute: AuthenticatedLobbyCodeRoute,
 }
 
