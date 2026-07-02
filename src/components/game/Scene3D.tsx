@@ -54,6 +54,20 @@ function LocalPlayer({
   const yaw = useRef(0);
   const camOffset = useMemo(() => new THREE.Vector3(0, 6, 8), []);
 
+  // Listen for external teleport (vent) events dispatched by game route.
+  useEffect(() => {
+    function onTeleport(e: Event) {
+      const detail = (e as CustomEvent<{ x: number; z: number }>).detail;
+      if (!detail || !meshRef.current) return;
+      meshRef.current.position.x = detail.x;
+      meshRef.current.position.z = detail.z;
+      myPosRef.current.x = detail.x;
+      myPosRef.current.z = detail.z;
+    }
+    window.addEventListener("para:teleport", onTeleport as EventListener);
+    return () => window.removeEventListener("para:teleport", onTeleport as EventListener);
+  }, [myPosRef]);
+
   useFrame((_state, delta) => {
     if (!meshRef.current) return;
     const dt = Math.min(delta, 0.05);
